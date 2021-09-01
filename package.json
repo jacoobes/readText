@@ -1,0 +1,18 @@
+{
+  "name": "readtext",
+  "version": "1.0.0",
+  "description": "reads text in videos",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.7.5"
+  },
+  "dependencies": {
+    "tesseract.js": "^2.1.1"
+  }
+}
