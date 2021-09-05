@@ -11,12 +11,9 @@ async function getFiles(dir) {
     }));
     return files.flat();
 }
-(async () => {
-    console.log(await readImages("E:\\Downloads\\result"));
-})();
-async function readImages(dir) {
-    const arrayOfFiles = await getFiles(dir);
-    for (const png of arrayOfFiles) {
+async function readImages(dir, fileBaseName) {
+    const arrayOfFiles = (await getFiles(dir));
+    for (const [index, png] of arrayOfFiles.entries()) {
         const worker = (0, tesseract_js_1.createWorker)();
         await worker.load();
         await worker.loadLanguage("eng");
@@ -25,17 +22,12 @@ async function readImages(dir) {
             tessedit_pageseg_mode: "3" /* AUTO */,
         });
         const { data: { text } } = await worker.recognize(png);
-        console.log(text);
         await worker.terminate();
+        await (0, promises_1.writeFile)(`E:\\Downloads\\outputOfScript\\${fileBaseName}${index}.txt`, text, "utf-8");
     }
-    // const worker = createWorker()
-    //   await worker.load()
-    //   await worker.loadLanguage("eng")
-    //   await worker.initialize('eng')
-    //   await worker.setParameters({
-    //     tessedit_pageseg_mode: PSM.AUTO,
-    //   })
-    //   const { data: {text} } = await worker.recognize(dir)
-    //   await worker.terminate()
 }
+;
+(async () => {
+    console.log(await readImages("E:\\Downloads\\result", "output"));
+})();
 //# sourceMappingURL=index.js.map

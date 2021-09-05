@@ -1,24 +1,17 @@
 
-import { readdir } from "fs/promises";
-import  { resolve }  from 'path'
-import { createWorker, createScheduler } from "tesseract.js";
-
+import { createWorker} from "tesseract.js";
 import { PSM } from "tesseract.js"
+import { getFiles } from "./utils/utils"
 
-async function getFiles(dir: string) : Promise<string[] | string> {
-    const dirents = await readdir(dir, { withFileTypes: true });
-    const files = await Promise.all(dirents.map((dirent) => {
-      const res = resolve(dir, dirent.name);
-      return dirent.isDirectory() ? getFiles(res) : res;
-    }));
-    return files.flat()
-  }
 
 async function readImages(dir: string) {
-    
+  const input = dir.match( /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/ ) 
+  ? dir 
+  : await getFiles(dir)
 
-  const arrayOfFiles = (await getFiles(dir) as string[])
-  for(const png of arrayOfFiles) {
+  if(Array.isArray(input)) {
+    
+  for(const png of input) {
     const worker = createWorker()
       await worker.load()
       await worker.loadLanguage("eng")
@@ -26,17 +19,27 @@ async function readImages(dir: string) {
       await worker.setParameters({
         tessedit_pageseg_mode: PSM.AUTO,
       })
-      const { data: {text} } = await worker.recognize(png)
+      const { data: { text } } = await worker.recognize(png)
       
       await worker.terminate()
-  } 
+  }
 
-
+} else {
+  const worker = createWorker()
+    await worker.load()
+    await worker.loadLanguage("eng")
+    await worker.initialize('eng')
+    await worker.setParameters({
+      tessedit_pageseg_mode: PSM.AUTO,
+    })
+  const { data: { text } } = await worker.recognize(dir)
+  
+  await worker.terminate()
 }
-
+ 
+};
 
 (async () => {
   console.log( await readImages("E:\\Downloads\\result"))
- 
- })()
+ })();
 
