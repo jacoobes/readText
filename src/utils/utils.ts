@@ -1,6 +1,8 @@
 
 import { readdir } from "fs/promises";
 import  { resolve }  from 'path'
+import Tesseract, { createWorker, PSM } from "tesseract.js";
+
 
 export async function getFiles(dir: string) : Promise<string[] | string> {
     const dirents = await readdir(dir, { withFileTypes: true });
@@ -11,7 +13,18 @@ export async function getFiles(dir: string) : Promise<string[] | string> {
     return files.flat()
   }
 
-export async function makeWorker() {
+export async function makeWorker(directory : string) : 
+  Promise<Tesseract.RecognizeResult> {
+  const worker = createWorker()
+    await worker.load()
+    await worker.loadLanguage("eng")
+    await worker.initialize('eng')
+    await worker.setParameters({
+      tessedit_pageseg_mode: PSM.AUTO,
+    })
+  const data = await worker.recognize(directory)
+  await worker.terminate()
 
-    
-}  
+  return data
+  }
+  

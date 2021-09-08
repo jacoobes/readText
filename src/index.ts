@@ -1,45 +1,32 @@
 
-import { createWorker} from "tesseract.js";
-import { PSM } from "tesseract.js"
-import { getFiles } from "./utils/utils"
+import { createWorker, PSM} from "tesseract.js";
+import { getFiles, makeWorker } from "./utils/utils"
 
+type input = string[] | string
 
 async function readImages(dir: string) {
-  const input = dir.match( /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/ ) 
+  const data : input = dir.match( /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/ ) 
   ? dir 
   : await getFiles(dir)
 
-  if(Array.isArray(input)) {
+
+  if(Array.isArray(data)) {
     
-  for(const png of input) {
-    const worker = createWorker()
-      await worker.load()
-      await worker.loadLanguage("eng")
-      await worker.initialize('eng')
-      await worker.setParameters({
-        tessedit_pageseg_mode: PSM.AUTO,
-      })
-      const { data: { text } } = await worker.recognize(png)
-      
-      await worker.terminate()
+  for(const png of data) {
+   const { data } = await makeWorker(png)
+    const text = data.text
+    console.log(text)
   }
 
 } else {
-  const worker = createWorker()
-    await worker.load()
-    await worker.loadLanguage("eng")
-    await worker.initialize('eng')
-    await worker.setParameters({
-      tessedit_pageseg_mode: PSM.AUTO,
-    })
-  const { data: { text } } = await worker.recognize(dir)
-  
-  await worker.terminate()
+  const { data } = await makeWorker(dir)
+    
+  console.log(data.text)
 }
  
 };
 
 (async () => {
-  console.log( await readImages("E:\\Downloads\\result"))
+  console.log( await readImages("https://helpdeskgeek.com/wp-content/pictures/2010/06/word-random-text.png"))
  })();
 
